@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver 
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService 
 from webdriver_manager.chrome import ChromeDriverManager 
+from selenium.webdriver.common.keys import Keys
+
 
 def get_AA_flights():
     flightURL = 'https://www.skyharbor.com/flights/?AD=A&search='
@@ -12,10 +15,9 @@ def get_AA_flights():
     info = flightSoup.findAll("tr", class_="filter-item")
     flightInfo = info[0].text.strip()
     print(flightInfo)
-    """
+    
     for infor in info:
         print(infor.text.strip())
-    """
-
+    
 
 get_AA_flights()
