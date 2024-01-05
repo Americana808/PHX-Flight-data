@@ -7,10 +7,14 @@ from email.message import EmailMessage
 import ssl
 import smtplib
 
+from datetime import datetime
+
+hour = datetime.now().strftime("%#I %p")
+
 em = EmailMessage()
-email_sender = '@gmail.com'
+email_sender = ''
 email_password = ''
-email_receiver = '@gmail.com'
+email_receiver = ''
 
 
 url = 'https://www.skyharbor.com/flights/?AD=D&search='
@@ -48,7 +52,7 @@ body = table
 
 em['From'] = email_sender
 em['To'] = email_receiver
-em['Subject'] = 'Flights as of '# !!! INSERT TIME AND DATE !!!
+em['Subject'] = '{} flights'.format(hour)# !!! INSERT TIME AND DATE !!!
 em.set_content(body)
 
 context = ssl.create_default_context()
