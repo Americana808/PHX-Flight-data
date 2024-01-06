@@ -1,2 +1,2 @@
-# PHX-Flight-data
-Obtains flight data from PHX website and emails to a user periodically.
+# Phoenix Airport web scraper
+Obtains flight data from the Phoenix Skyharbor website and sends an email to a user.
