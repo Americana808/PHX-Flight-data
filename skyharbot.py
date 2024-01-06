@@ -19,7 +19,7 @@ email_receiver = ''
 
 url = 'https://www.skyharbor.com/flights/?AD=D&search='
 
-driver = webdriver.Chrome()
+driver = webdriver.Chrome() #install chromedriver when on linux: sudo apt-get install chromium-chromedriver
 driver.get(url)
 driver.implicitly_wait(2)
 
