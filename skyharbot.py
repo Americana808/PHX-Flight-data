@@ -44,6 +44,7 @@ for element in element_with_data_airline:
             flightList[i].append(gate)
             flightList[i].append(estimated)
             i += 1
+driver.close()
 
 headers = ['city', 'time', 'gate', 'actual']
 table = tabulate(flightList, headers=headers, tablefmt="table")
