@@ -1,2 +1,5 @@
 # Phoenix Airport web scraper
-Obtains flight data from the Phoenix Skyharbor website and sends an email to a user.
+Scrapes flight data from the Phoenix Skyharbor website and displays it online
+
+# Online at:
+mport6.pythonanywhere.com
