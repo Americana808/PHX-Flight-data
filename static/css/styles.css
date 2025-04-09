@@ -12,12 +12,12 @@ body {
 }
 
 .header {
-    display: inline-block; /* Ensures the container wraps tightly around its content */
+    display: inline-block;
     vertical-align: middle;
-    background-color: #f0f8ff; /* Light blue background */
-    padding: 20px; /* Add padding around the text block */
-    border-radius: 10px; /* Rounded corners for the container */
-    text-align: center; /* Center-align the text inside the container */
+    background-color: #f0f8ff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
 }
 
 table {
@@ -53,4 +53,21 @@ table tr:hover {
 
 .attribution {
     margin-bottom: auto;
+}
+
+@media only screen and (max-width: 800px) {
+    table {
+        width: 100%;
+        overflow-x: auto;
+        
+    }
+
+    table tr {
+        display: table-row;
+    }
+
+    table th, table td {
+        text-align: center;
+        white-space: nowrap;
+    }
 }
