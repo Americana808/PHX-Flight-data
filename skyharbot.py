@@ -1,62 +1,48 @@
+# scrape_flights.py
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from tabulate import tabulate
-
-# EMAIL IMPORTS
-from email.message import EmailMessage
-import ssl
-import smtplib
-
 from datetime import datetime
+import json
+import os
 
-hour = datetime.now().strftime("%#I %p")
+# Use headless Chrome
+from selenium.webdriver.chrome.options import Options
 
-em = EmailMessage()
-email_sender = ''
-email_password = ''
-email_receiver = ''
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
+driver = webdriver.Chrome(options=chrome_options)
 
 url = 'https://www.skyharbor.com/flights/?AD=D&search='
-
-driver = webdriver.Chrome() #install chromedriver when on linux: sudo apt-get install chromium-chromedriver
 driver.get(url)
 driver.implicitly_wait(2)
 
-element_with_data_airline = driver.find_elements(by=By.XPATH, value="//tr[@data-ad='D' and @data-airline='American Airlines']")
+elements = driver.find_elements(by=By.XPATH, value="//tr[@data-ad='D' and @data-airline='American Airlines']")
 
-gates = ["A22", "A24", "A25", "A26", "A27", " A28", "A29", "A30"]
+gates = ["A22", "A24", "A25", "A26", "A27", "A28", "A29", "A30"]
 
-flightList = []
-i = 0
+flights = []
+for el in elements:
+    airline = el.get_attribute("data-airline")
+    time = el.get_attribute("data-scheduled")
+    gate = el.get_attribute("data-gate")
+    estimated = el.get_attribute("data-estimated")
+    city = el.get_attribute("data-city")
 
-for element in element_with_data_airline:
-    airline = element.get_attribute("data-airline")
-    time = element.get_attribute("data-scheduled")
-    gate = element.get_attribute("data-gate")
-    estimated = element.get_attribute("data-estimated")
-    city = element.get_attribute("data-city")
-    if gate in gates:
-        if time and time[0].isdigit():
-            flightList.append([])
-            flightList[i].append(city[len(city)-4:len(city)-1])
-            flightList[i].append(time)
-            flightList[i].append(gate)
-            flightList[i].append(estimated)
-            i += 1
-driver.close()
+    if gate in gates and time and time[0].isdigit():
+        flights.append({
+            "city": city[-4:-1],
+            "time": time,
+            "gate": gate.strip(),
+            "actual": estimated
+        })
 
-headers = ['city', 'time', 'gate', 'actual']
-table = tabulate(flightList, headers=headers, tablefmt="table")
-# possibly format body to include the totals flights left and the when the last flgiht is.
-body = table
+driver.quit()
 
-em['From'] = email_sender
-em['To'] = email_receiver
-em['Subject'] = '{} flights'.format(hour)# !!! INSERT TIME AND DATE !!!
-em.set_content(body)
-
-context = ssl.create_default_context()
-with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-    smtp.login(email_sender, email_password)
-    smtp.sendmail(email_sender, email_receiver, em.as_string())
+# Save locally
+save_path = os.path.join(os.path.dirname(__file__), "flights.json")
+with open(save_path, "w") as f:
+    json.dump(flights, f)

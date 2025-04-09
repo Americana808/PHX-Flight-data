@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sky Harbor Flights</title>
+    <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <h1>American Airlines Departures</h1>
+            <p>Refreshes every hour at HH:05 and HH:35</p>
+        </div>
+        <table>
+            <tr>
+                <th>City</th>
+                <th>Scheduled Time</th>
+                <th>Gate</th>
+                <th>Estimated</th>
+            </tr>
+            {% for flight in flights %}
+            <tr>
+                <td>{{ flight.city }}</td>
+                <td>{{ flight.time }}</td>
+                <td>{{ flight.gate }}</td>
+                <td>{{ flight.actual }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="attribution"> <a href="https://www.vecteezy.com/free-vector/air">Air Vectors by Vecteezy</a></body></div>
+</body>
+</html>

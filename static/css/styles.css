@@ -1,0 +1,56 @@
+/* styles.css */
+body {
+    font-family: "Roboto", sans-serif;
+    background-image: url(/static/images/1sim4airplainseamless23303_generated.jpg);
+    background-size: 800px;
+    text-align: center;
+}
+
+.content {
+    display: inline-block;
+    text-align: center;
+}
+
+.header {
+    display: inline-block; /* Ensures the container wraps tightly around its content */
+    vertical-align: middle;
+    background-color: #f0f8ff; /* Light blue background */
+    padding: 20px; /* Add padding around the text block */
+    border-radius: 10px; /* Rounded corners for the container */
+    text-align: center; /* Center-align the text inside the container */
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    border: #808080 1px solid;
+    border-radius:  6px;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #fad1ff;
+    color: black;
+}
+
+table tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+table tr:nth-child(even) {
+    background-color: #e5e5e5;
+}
+
+table tr:hover {
+    background-color: #808080;
+    cursor: pointer;
+}
+
+.attribution {
+    margin-bottom: auto;
+}
