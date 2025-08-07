@@ -4,7 +4,7 @@ A Python-based web application that **scrapes live flight data** from Phoenix Sk
 
 ---
 
-## 📌 Features
+## Features
 - **Live Data Scraping** — Pulls current flight information from PHX airport’s public data.
 - **Web Interface** — Flask app with HTML/CSS front-end for easy viewing of flight details.
 - **Optional Email Notifications** — Automatically sends flight updates to subscribers. ()
@@ -13,7 +13,7 @@ A Python-based web application that **scrapes live flight data** from Phoenix Sk
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 - **Python 3**
 - **Flask** — Web framework for serving data.
 - **HTML / CSS** — Front-end display.
@@ -22,7 +22,7 @@ A Python-based web application that **scrapes live flight data** from Phoenix Sk
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 ```
 PHX-Flight-data/
 │── app.py               # Main Flask application
@@ -68,6 +68,9 @@ http://127.0.0.1:5000
 
 ## Live Demo
 [mport6.pythonanywhere.com](https://mport6.pythonanywhere.com/)
+
+## Real-world usage:
+This application is actively used at my current job at a Phoenix Sky Harbor International Airport kiosk to help monitor real-time flights and provide accurate travel information to customers. The system replaces manual checks, streamlining customer service and improving efficiency.
 
 ---
 
