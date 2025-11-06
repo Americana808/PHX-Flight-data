@@ -14,11 +14,10 @@ A Python-based web application that **scrapes live flight data** from Phoenix Sk
 ---
 
 ## Technologies Used
-- **Python 3**
+- **Python**
 - **Flask** — Web framework for serving data.
 - **HTML / CSS** — Front-end display.
-- **Requests / BeautifulSoup** — Data scraping & parsing.
-- **SMTP / smtplib** — Email sending functionality.
+- **Selenium** — Data scraping & parsing.
 
 ---
 
