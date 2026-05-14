@@ -1,81 +1,92 @@
 # ✈️ PHX Flight Data Scraper & Tracker
 
-A Python-based web application that **scrapes live flight data** from Phoenix Sky Harbor International Airport (PHX) and displays it through a **Flask-powered web interface**. Includes optional automation for **sending periodic flight updates via email** to subscribed users.
+A web application that scrapes live departure data from Phoenix Sky Harbor International Airport (PHX) and displays it through a modern React frontend. Built for real-time use at a PHX kiosk.
 
 ---
 
 ## Features
-- **Live Data Scraping** — Pulls current flight information from PHX airport’s public data.
-- **Web Interface** — Flask app with HTML/CSS front-end for easy viewing of flight details.
-- **Optional Email Notifications** — Automatically sends flight updates to subscribers. ()
-- **Data Formatting** — Cleans and formats scraped data for user-friendly display.
-- **Customizable** — Easily update scraping targets or display styles.
+
+- **Live Data Scraping** - Pulls current American Airlines departure info from skyharbor.com using Selenium
+- **Split-Flap UI** - Mechanical departure board aesthetic with per-character flap tiles
+- **Scrape Button** - Trigger a fresh scrape on demand from the browser
+- **Auto-Refresh** - Automatically re-fetches data every 30 minutes
+- **Flight Links** - Each flight number links to a Google search for quick lookup
+- **Dark & Light Themes** - Toggle between charcoal/cream and parchment/ink
+- **Mobile Responsive** - Card-based layout on small screens, full table on desktop
 
 ---
 
-## Technologies Used
-- **Python**
-- **Flask** — Web framework for serving data.
-- **HTML / CSS** — Front-end display.
-- **Selenium** — Data scraping & parsing.
+## Technologies
+
+- **Python / Flask** - REST API backend
+- **Selenium + webdriver-manager** - Headless Chrome scraping
+- **React + Vite** - Frontend
+- **Tailwind CSS** - Styling
+- **Gunicorn + Nginx** - Production server
 
 ---
 
 ## Project Structure
+
 ```
 PHX-Flight-data/
-│── app.py               # Main Flask application
-│── scraper.py           # Logic for scraping PHX flight data
-│── templates/           # HTML templates for Flask
-│── static/              # CSS and static assets
-│── requirements.txt     # Python dependencies
-│── README.md            # Project documentation
+├── webapp.py              # Flask API (GET /api/flights, POST /api/scrape)
+├── skyharbot.py           # Selenium scraper - writes to flights.json
+├── flights.json           # Cached flight data
+├── requirements.txt       # Python dependencies
+├── nginx.conf             # Nginx config for VPS deployment
+├── phx-flights.service    # Systemd service for Gunicorn
+├── deploy.md              # Full VPS deployment guide
+└── frontend/              # React + Vite app
+    ├── src/
+    │   └── components/
+    │       └── FlightBoard.jsx
+    ├── vite.config.js
+    └── package.json
 ```
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### Clone the repository
+### Clone the repo
+
 ```bash
 git clone https://github.com/Americana808/PHX-Flight-data.git
 cd PHX-Flight-data
 ```
 
-### Install dependencies
+### Backend
+
 ```bash
 pip install -r requirements.txt
+python webapp.py
 ```
 
-### Run the application
+### Frontend
+
 ```bash
-python app.py
+cd frontend
+npm install
+npm run dev
 ```
-The app will start locally. Open your browser and go to:
-```
-http://127.0.0.1:5000
-```
+
+Open `http://localhost:5173` - API calls are proxied to Flask on port 5000.
 
 ---
 
-## Optional Email Notifications
-- Feature is disabled by default
-- Users can enable it in the code if email notifications if they want to receive scheduled flight status updates
-- Configure your email server settings in `app.py` or a `.env` file.
+## Deployment
+
+See [deploy.md](deploy.md) for the full VPS setup guide (Ubuntu + Nginx + Gunicorn + Let's Encrypt).
 
 ---
 
 ## Live Demo
-[mport6.pythonanywhere.com](https://mport6.pythonanywhere.com/)
 
-## Real-world usage:
-This application is actively used at my current job at a Phoenix Sky Harbor International Airport kiosk to help monitor real-time flights and provide accurate travel information to customers. The system replaces manual checks, streamlining customer service and improving efficiency.
+[skyharbot.work](https://skyharbot.work)
 
 ---
 
-## Contributing
-Pull requests are welcome! If you find any bugs or want to suggest improvements, open an issue or submit a PR.
+## Real-World Usage
 
----
-
-**Author:** [Marco Portillo](https://github.com/Americana808)  
+Actively used at a Phoenix Sky Harbor International Airport kiosk to monitor real-time American Airlines departures at gates A22, A24-A30. Replaces manual flight checks and helps staff obtain accurate travel for store hours.
