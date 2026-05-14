@@ -1,17 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 
-// Derive status from scheduled vs actual time
 function deriveStatus(scheduled, actual) {
   if (!actual || actual === scheduled) return 'ontime'
   return 'delayed'
-}
-
-// Parse time string to minutes for comparison
-function parseTime(t) {
-  if (!t) return 0
-  const [time, period] = t.split(' ')
-  const [h, m] = time.split(':').map(Number)
-  return (period === 'PM' && h !== 12 ? h + 12 : h === 12 && period === 'AM' ? 0 : h) * 60 + m
 }
 
 function timeAgo(timestamp) {
@@ -21,7 +12,17 @@ function timeAgo(timestamp) {
   return `${Math.floor(seconds / 3600)}h ago`
 }
 
-// ─── Theme definitions (mirroring the design file) ───────────────────────────
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth)
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return width
+}
+
+// ─── Themes ──────────────────────────────────────────────────────────────────
 
 const THEMES = {
   dark: {
@@ -58,6 +59,7 @@ const THEMES = {
     foot:         'oklch(0.5 0.03 80)',
     toggleBg:     'oklch(0.22 0.015 80)',
     toggleColor:  'oklch(0.7 0.04 80)',
+    cardBorder:   'oklch(0.22 0.012 80)',
   },
   light: {
     page:         'oklch(0.965 0.012 80)',
@@ -93,40 +95,35 @@ const THEMES = {
     foot:         'oklch(0.5 0.02 60)',
     toggleBg:     'oklch(0.88 0.018 75)',
     toggleColor:  'oklch(0.45 0.02 60)',
+    cardBorder:   'oklch(0.85 0.018 70)',
   },
 }
 
-// ─── Flap tile component ──────────────────────────────────────────────────────
+// ─── Flap tiles ───────────────────────────────────────────────────────────────
 
 function Flaps({ text, size = 22, color, weight = 600, alt = false, t }) {
   return (
-    <span style={{ display: 'inline-flex', gap: 3, fontFamily: '"JetBrains Mono", monospace' }}>
+    <span style={{ display: 'inline-flex', gap: 2, fontFamily: '"JetBrains Mono", monospace' }}>
       {text.split('').map((ch, i) => (
-        <span
-          key={i}
-          style={{
-            position: 'relative',
-            width: ch === ' ' ? size * 0.4 : size * 0.72,
-            height: size * 1.15,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: ch === ' ' ? 'transparent' : (alt ? t.tileBgAlt : t.tileBg),
-            color: color || t.tileCity,
-            fontWeight: weight,
-            fontSize: size,
-            borderRadius: 3,
-            boxShadow: ch === ' ' ? 'none'
-              : `inset 0 1px 0 ${t.tileTopHi}, 0 1px 0 ${t.tileBotShade}`,
-          }}
-        >
+        <span key={i} style={{
+          position: 'relative',
+          width: ch === ' ' ? size * 0.4 : size * 0.72,
+          height: size * 1.15,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: ch === ' ' ? 'transparent' : (alt ? t.tileBgAlt : t.tileBg),
+          color: color || t.tileCity,
+          fontWeight: weight,
+          fontSize: size,
+          borderRadius: 3,
+          boxShadow: ch === ' ' ? 'none' : `inset 0 1px 0 ${t.tileTopHi}, 0 1px 0 ${t.tileBotShade}`,
+        }}>
           {ch}
           {ch !== ' ' && (
             <span style={{
               position: 'absolute', left: 2, right: 2, top: '50%',
-              height: 1,
-              background: t.tileHair,
-              opacity: t.tileHairOp,
+              height: 1, background: t.tileHair, opacity: t.tileHairOp,
             }} />
           )}
         </span>
@@ -135,23 +132,34 @@ function Flaps({ text, size = 22, color, weight = 600, alt = false, t }) {
   )
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
+// ─── Status ───────────────────────────────────────────────────────────────────
 
-function Status({ status, actual, t }) {
+function Status({ status, actual, t, small = false }) {
+  const fs = small ? 11 : 13
   if (status === 'ontime') return (
-    <span style={{ fontSize: 13, letterSpacing: '0.12em', color: t.on, textShadow: t.onGlow }}>
-      ● ON TIME
-    </span>
+    <span style={{ fontSize: fs, letterSpacing: '0.1em', color: t.on, textShadow: t.onGlow }}>● ON TIME</span>
   )
   if (status === 'boarding') return (
-    <span style={{ fontSize: 13, letterSpacing: '0.12em', color: t.boarding }}>
-      ● BOARDING
-    </span>
+    <span style={{ fontSize: fs, letterSpacing: '0.1em', color: t.boarding }}>● BOARDING</span>
   )
   return (
-    <span style={{ fontSize: 13, letterSpacing: '0.1em', color: t.delay }}>
-      ● DELAYED&nbsp;&nbsp;{actual}
-    </span>
+    <span style={{ fontSize: fs, letterSpacing: '0.08em', color: t.delay }}>● DELAYED {actual}</span>
+  )
+}
+
+// ─── Flight number link ───────────────────────────────────────────────────────
+
+function FlightLink({ flight, t, size = 15, alt = false }) {
+  if (!flight) return <span style={{ fontSize: 13, color: t.foot }}>—</span>
+  return (
+    <a
+      href={`https://www.google.com/search?q=AA+flight+${flight}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ textDecoration: 'none' }}
+    >
+      <Flaps text={`AA${flight}`} size={size} color={t.accent} weight={600} alt={alt} t={t} />
+    </a>
   )
 }
 
@@ -159,27 +167,16 @@ function Status({ status, actual, t }) {
 
 function ScrapeButton({ onClick, scraping, t }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={scraping}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 16px',
-        borderRadius: 6,
-        background: t.accent,
-        color: t.accentInk,
-        border: 'none',
-        fontSize: 12,
-        fontWeight: 600,
-        letterSpacing: '0.1em',
-        cursor: scraping ? 'not-allowed' : 'pointer',
-        opacity: scraping ? 0.65 : 1,
-        fontFamily: '"JetBrains Mono", monospace',
-        transition: 'opacity 0.15s',
-      }}
-    >
+    <button onClick={onClick} disabled={scraping} style={{
+      display: 'inline-flex', alignItems: 'center', gap: 8,
+      padding: '8px 14px', borderRadius: 6,
+      background: t.accent, color: t.accentInk,
+      border: 'none', fontSize: 12, fontWeight: 600,
+      letterSpacing: '0.1em', cursor: scraping ? 'not-allowed' : 'pointer',
+      opacity: scraping ? 0.65 : 1,
+      fontFamily: '"JetBrains Mono", monospace',
+      transition: 'opacity 0.15s', whiteSpace: 'nowrap',
+    }}>
       {scraping ? (
         <>
           <svg style={{ animation: 'spin 1s linear infinite' }} width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -188,25 +185,54 @@ function ScrapeButton({ onClick, scraping, t }) {
           </svg>
           SCRAPING...
         </>
-      ) : (
-        <>⟳ REFRESH DATA</>
-      )}
+      ) : <>⟳ REFRESH</>}
     </button>
   )
 }
 
-// ─── Main board ───────────────────────────────────────────────────────────────
+// ─── Mobile card ─────────────────────────────────────────────────────────────
+
+function FlightCard({ fl, i, t }) {
+  return (
+    <div style={{
+      padding: '14px 16px',
+      background: i % 2 === 0 ? t.rowA : t.rowB,
+      borderTop: `1px solid ${t.rowSep}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        {/* Left: gate · time · status stacked */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Flaps text={fl.gate} size={13} color={t.tileMeta} weight={500} alt={i % 2 === 1} t={t} />
+            <span style={{ color: t.rowSep, fontSize: 12 }}>·</span>
+            <Flaps text={fl.scheduled.replace(' ', '')} size={13} color={t.tileMeta} weight={500} alt={i % 2 === 1} t={t} />
+          </div>
+          <Status status={fl.status} actual={fl.actual} t={t} small />
+        </div>
+        {/* Right: destination code above flight link */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <Flaps text={fl.code} size={22} weight={700} color={t.tileCode} alt={i % 2 === 1} t={t} />
+          <FlightLink flight={fl.flight} t={t} size={13} alt={i % 2 === 1} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function FlightBoard() {
-  const [flights, setFlights]       = useState([])
+  const [flights, setFlights]         = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
-  const [loading, setLoading]       = useState(true)
-  const [scraping, setScraping]     = useState(false)
-  const [error, setError]           = useState(null)
-  const [theme, setTheme]           = useState('dark')
-  const [tick, setTick]             = useState(0)
+  const [loading, setLoading]         = useState(true)
+  const [scraping, setScraping]       = useState(false)
+  const [error, setError]             = useState(null)
+  const [theme, setTheme]             = useState('dark')
+  const [tick, setTick]               = useState(0)
 
-  const t = THEMES[theme]
+  const width  = useWindowWidth()
+  const mobile = width < 640
+  const t      = THEMES[theme]
 
   const fetchFlights = useCallback(async () => {
     try {
@@ -225,13 +251,13 @@ export default function FlightBoard() {
 
   useEffect(() => {
     fetchFlights()
-    const interval = setInterval(fetchFlights, 30 * 60 * 1000)
-    return () => clearInterval(interval)
+    const iv = setInterval(fetchFlights, 30 * 60 * 1000)
+    return () => clearInterval(iv)
   }, [fetchFlights])
 
   useEffect(() => {
-    const t = setInterval(() => setTick(n => n + 1), 30000)
-    return () => clearInterval(t)
+    const iv = setInterval(() => setTick(n => n + 1), 30000)
+    return () => clearInterval(iv)
   }, [])
 
   const handleScrape = async () => {
@@ -250,7 +276,6 @@ export default function FlightBoard() {
     }
   }
 
-  // Normalize API data to board format
   const boardFlights = flights.map(f => ({
     code:      f.city,
     scheduled: f.time,
@@ -260,232 +285,193 @@ export default function FlightBoard() {
     flight:    f.flight || null,
   }))
 
-  const now = new Date()
-  const clock = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const clock = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
 
   return (
     <div style={{
-      width: '100%',
-      minHeight: '100vh',
-      background: t.page,
-      color: t.pageText,
+      width: '100%', minHeight: '100vh',
+      background: t.page, color: t.pageText,
       fontFamily: '"JetBrains Mono", monospace',
-      padding: '32px 48px',
+      padding: mobile ? '16px' : '32px 48px',
       boxSizing: 'border-box',
     }}>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* ── Top bar ── */}
+        {/* ── Header ── */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingBottom: 20,
+          paddingBottom: 16,
           borderBottom: `1px dashed ${t.dashed}`,
-          flexWrap: 'wrap',
-          gap: 16,
+          marginBottom: 20,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 8,
-              display: 'grid', placeItems: 'center',
-              background: t.accent, color: t.accentInk,
-              fontSize: 18, fontWeight: 700,
-            }}>◆</div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.15em', color: t.headerLabel }}>
-                PHX · SKY HARBOR
+          {/* Top row: logo + controls */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: mobile ? 12 : 14, fontWeight: 700, letterSpacing: '0.15em', color: t.headerLabel }}>
+                  PHX · SKY HARBOR
+                </div>
+                <div style={{ marginTop: 2, fontSize: 10, color: t.headerSub, letterSpacing: '0.1em' }}>
+                  TERMINAL 4 · GATES A22, 24–A30
+                </div>
               </div>
-              <div style={{ marginTop: 3, fontSize: 11, color: t.headerSub, letterSpacing: '0.12em' }}>
-                TERMINAL 4 · GATES A22–A30
-              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Clock — desktop only */}
+              {!mobile && (
+                <div style={{ textAlign: 'right', marginRight: 8 }}>
+                  <div style={{ fontSize: 10, letterSpacing: '0.18em', color: t.metaLabel }}>LOCAL · MST</div>
+                  <div style={{ marginTop: 3, fontSize: 13, color: t.clockNum, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                    {clock}
+                  </div>
+                </div>
+              )}
+              <ScrapeButton onClick={handleScrape} scraping={scraping} t={t} />
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                style={{
+                  background: t.toggleBg, color: t.toggleColor,
+                  border: 'none', borderRadius: 6,
+                  padding: '8px 10px', fontSize: 15,
+                  cursor: 'pointer', lineHeight: 1,
+                }}
+              >
+                {theme === 'dark' ? '☀' : '◑'}
+              </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-            {/* Clock */}
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, letterSpacing: '0.18em', color: t.metaLabel }}>LOCAL · MST</div>
-              <div style={{ marginTop: 4, fontSize: 22, color: t.clockNum, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                {clock.replace(':', ' : ')}
-              </div>
+          {/* Mobile: clock below header */}
+          {mobile && (
+            <div style={{ marginTop: 10, fontSize: 10, color: t.metaLabel, letterSpacing: '0.12em' }}>
+              {clock}
             </div>
-            {/* Last updated */}
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, letterSpacing: '0.18em', color: t.metaLabel }}>UPDATED</div>
-              <div style={{ marginTop: 4, fontSize: 14, color: t.accent, letterSpacing: '0.1em' }}>
-                {lastUpdated ? timeAgo(lastUpdated).toUpperCase() : '—'}
-              </div>
-            </div>
-            {/* Scrape button */}
-            <ScrapeButton onClick={handleScrape} scraping={scraping} t={t} />
-            {/* Theme toggle */}
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              title="Toggle theme"
-              style={{
-                background: t.toggleBg,
-                color: t.toggleColor,
-                border: 'none',
-                borderRadius: 6,
-                padding: '8px 12px',
-                fontSize: 16,
-                cursor: 'pointer',
-                lineHeight: 1,
-              }}
-            >
-              {theme === 'dark' ? '☀' : '◑'}
-            </button>
-          </div>
+          )}
         </div>
 
-        {/* ── Board title ── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 28, marginBottom: 18 }}>
-          <Flaps text="DEPARTURES" size={42} weight={700} color={t.tileTitle} t={t} />
-          <span style={{ color: t.chipMute, fontSize: 14, letterSpacing: '0.15em' }}>
-            · {boardFlights.length} FLIGHTS
+        {/* ── Title ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <Flaps text="DEPARTURES" size={mobile ? 24 : 42} weight={700} color={t.tileTitle} t={t} />
+          <span style={{ color: t.chipMute, fontSize: mobile ? 11 : 14, letterSpacing: '0.12em' }}>
+            · {boardFlights.length} flights
           </span>
           <div style={{
-            marginLeft: 'auto',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            fontSize: 11,
-            letterSpacing: '0.2em',
-            color: t.on,
+            marginLeft: 'auto', display: 'inline-flex', alignItems: 'center',
+            gap: 7, fontSize: mobile ? 12 : 15, letterSpacing: '0.12em', color: t.accent,
           }}>
-            <span style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: t.on, boxShadow: t.onGlow,
-            }} />
-            LIVE
+            {lastUpdated ? `UPDATED ${timeAgo(lastUpdated).toUpperCase()}` : 'LOADING...'}
           </div>
         </div>
 
-        {/* ── Error banner ── */}
+        {/* ── Error ── */}
         {error && (
           <div style={{
-            marginBottom: 16,
-            padding: '10px 16px',
-            borderRadius: 8,
-            background: 'oklch(0.25 0.06 20)',
-            border: '1px solid oklch(0.4 0.1 20)',
-            color: 'oklch(0.78 0.12 30)',
-            fontSize: 13,
-            letterSpacing: '0.05em',
+            marginBottom: 14, padding: '10px 14px', borderRadius: 8,
+            background: 'oklch(0.25 0.06 20)', border: '1px solid oklch(0.4 0.1 20)',
+            color: 'oklch(0.78 0.12 30)', fontSize: 12, letterSpacing: '0.05em',
           }}>
             ⚠ {error}
           </div>
         )}
 
-        {/* ── Column headers ── */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '10px 20px',
-          background: t.headStrip,
-          color: t.headStripIn,
-          fontSize: 11,
-          letterSpacing: '0.18em',
-          borderRadius: '8px 8px 0 0',
-        }}>
-          <div style={{ flex: 1 }}>GATE</div>
-          <div style={{ flex: 1 }}>TIME</div>
-          <div style={{ flex: 1 }}>DESTINATION</div>
-          <div style={{ flex: 1 }}>STATUS</div>
-          <div style={{ flex: 1, textAlign: 'right' }}>FLIGHT</div>
-        </div>
-
-        {/* ── Rows ── */}
-        <div style={{ borderRadius: '0 0 8px 8px', overflow: 'hidden', boxShadow: t.shadow }}>
-          {loading ? (
+        {/* ── Table (desktop) / Cards (mobile) ── */}
+        {mobile ? (
+          // ── Mobile card list ──
+          <div style={{ borderRadius: 10, overflow: 'hidden', boxShadow: t.shadow }}>
+            {/* Mobile header strip */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-              padding: '60px 20px',
-              background: t.rowA,
-              color: t.chipMute,
-              fontSize: 14,
-              letterSpacing: '0.12em',
+              display: 'flex', justifyContent: 'space-between',
+              padding: '8px 16px',
+              background: t.headStrip, color: t.headStripIn,
+              fontSize: 10, letterSpacing: '0.18em',
             }}>
-              <svg style={{ animation: 'spin 1s linear infinite' }} width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25" />
-                <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-              </svg>
-              LOADING FLIGHTS...
+              <span>GATE · TIME · STATUS</span>
+              <span>DEST · FLIGHT</span>
             </div>
-          ) : boardFlights.length === 0 ? (
-            <div style={{
-              padding: '60px 20px',
-              textAlign: 'center',
-              background: t.rowA,
-              color: t.chipMute,
-              fontSize: 13,
-              letterSpacing: '0.12em',
-            }}>
-              NO FLIGHT DATA AVAILABLE
-            </div>
-          ) : (
-            boardFlights.map((fl, i) => (
-              <div
-                key={`${fl.code}-${fl.scheduled}-${i}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '12px 20px',
-                  background: i % 2 === 0 ? t.rowA : t.rowB,
-                  borderTop: `1px solid ${t.rowSep}`,
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <Flaps text={fl.gate} size={15} color={t.tileMeta} weight={500} alt={i % 2 === 1} t={t} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <Flaps text={fl.scheduled.replace(' ', '')} size={15} color={t.tileMeta} weight={500} alt={i % 2 === 1} t={t} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <Flaps text={fl.code} size={20} weight={700} color={t.tileCode} alt={i % 2 === 1} t={t} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <Status status={fl.status} actual={fl.actual} t={t} />
-                </div>
-                <div style={{ flex: 1, textAlign: 'right' }}>
-                  {fl.flight ? (
-                    <a
-                      href={`https://www.google.com/search?q=AA+flight+${fl.flight}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <Flaps text={`AA${fl.flight}`} size={15} color={t.accent} weight={600} alt={i % 2 === 1} t={t} />
-                    </a>
-                  ) : (
-                    <span style={{ fontSize: 13, color: t.foot, letterSpacing: '0.08em' }}>—</span>
-                  )}
-                </div>
+            {loading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '40px 16px', background: t.rowA, color: t.chipMute, fontSize: 12, letterSpacing: '0.1em' }}>
+                <svg style={{ animation: 'spin 1s linear infinite' }} width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25" />
+                  <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                </svg>
+                LOADING...
               </div>
-            ))
-          )}
-        </div>
+            ) : boardFlights.length === 0 ? (
+              <div style={{ padding: '40px 16px', textAlign: 'center', background: t.rowA, color: t.chipMute, fontSize: 12 }}>
+                NO FLIGHT DATA
+              </div>
+            ) : (
+              boardFlights.map((fl, i) => <FlightCard key={`${fl.code}-${i}`} fl={fl} i={i} t={t} />)
+            )}
+          </div>
+        ) : (
+          // ── Desktop table ──
+          <>
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              padding: '10px 20px',
+              background: t.headStrip, color: t.headStripIn,
+              fontSize: 11, letterSpacing: '0.18em',
+              borderRadius: '8px 8px 0 0',
+            }}>
+              <div style={{ flex: 1 }}>GATE</div>
+              <div style={{ flex: 1 }}>TIME</div>
+              <div style={{ flex: 1 }}>DESTINATION</div>
+              <div style={{ flex: 1 }}>STATUS</div>
+              <div style={{ flex: 1, textAlign: 'right' }}>FLIGHT</div>
+            </div>
+
+            <div style={{ borderRadius: '0 0 8px 8px', overflow: 'hidden', boxShadow: t.shadow }}>
+              {loading ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '60px 20px', background: t.rowA, color: t.chipMute, fontSize: 14, letterSpacing: '0.12em' }}>
+                  <svg style={{ animation: 'spin 1s linear infinite' }} width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25" />
+                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                  </svg>
+                  LOADING FLIGHTS...
+                </div>
+              ) : boardFlights.length === 0 ? (
+                <div style={{ padding: '60px 20px', textAlign: 'center', background: t.rowA, color: t.chipMute, fontSize: 13, letterSpacing: '0.12em' }}>
+                  NO FLIGHT DATA AVAILABLE
+                </div>
+              ) : (
+                boardFlights.map((fl, i) => (
+                  <div key={`${fl.code}-${fl.scheduled}-${i}`} style={{
+                    display: 'flex', alignItems: 'center',
+                    padding: '12px 20px',
+                    background: i % 2 === 0 ? t.rowA : t.rowB,
+                    borderTop: `1px solid ${t.rowSep}`,
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <Flaps text={fl.gate} size={15} color={t.tileMeta} weight={500} alt={i % 2 === 1} t={t} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <Flaps text={fl.scheduled.replace(' ', '')} size={15} color={t.tileMeta} weight={500} alt={i % 2 === 1} t={t} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <Flaps text={fl.code} size={20} weight={700} color={t.tileCode} alt={i % 2 === 1} t={t} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <Status status={fl.status} actual={fl.actual} t={t} />
+                    </div>
+                    <div style={{ flex: 1, textAlign: 'right' }}>
+                      <FlightLink flight={fl.flight} t={t} size={15} alt={i % 2 === 1} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
 
         {/* ── Footer ── */}
         <div style={{
-          marginTop: 16,
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: 11,
-          letterSpacing: '0.15em',
-          color: t.foot,
-          flexWrap: 'wrap',
-          gap: 8,
+          marginTop: 14, display: 'flex', justifyContent: 'space-between',
+          fontSize: 10, letterSpacing: '0.14em', color: t.foot, flexWrap: 'wrap', gap: 6,
         }}>
-          <span>◇ {boardFlights.length} flights · gates A22–A30</span>
+          <span>{boardFlights.length} flights · gates A22, 24–A30</span>
           <span>Auto-refresh ⟳ 30 min</span>
         </div>
 
