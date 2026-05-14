@@ -1,4 +1,4 @@
-# ✈️ PHX Flight Data Scraper & Tracker
+# PHX Flight Data Scraper & Tracker
 
 A web application that scrapes live departure data from Phoenix Sky Harbor International Airport (PHX) and displays it through a modern React frontend. Built for real-time use at a PHX kiosk.
 
