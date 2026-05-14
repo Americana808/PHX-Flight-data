@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 import os
 import subprocess
+import sys
 
 app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
 CORS(app)
@@ -26,7 +27,7 @@ def get_flights():
 def scrape():
     try:
         result = subprocess.run(
-            ["python", SCRAPER_PATH],
+            [sys.executable, SCRAPER_PATH],
             capture_output=True,
             text=True,
             timeout=60,
