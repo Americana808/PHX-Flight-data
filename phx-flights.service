@@ -1,0 +1,12 @@
+[Unit]
+Description=PHX Flight Data Flask API
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/phx-flights
+ExecStart=/var/www/phx-flights/venv/bin/gunicorn -w 2 -b 127.0.0.1:5000 webapp:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,12 +1,11 @@
 # scrape_flights.py
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from datetime import datetime
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import json
 import os
-
-# Use headless Chrome
-from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -14,7 +13,7 @@ chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
-driver = webdriver.Chrome(options=chrome_options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 url = 'https://www.skyharbor.com/flights/?AD=D&search='
 driver.get(url)
@@ -32,12 +31,15 @@ for el in elements:
     estimated = el.get_attribute("data-estimated")
     city = el.get_attribute("data-city")
 
+    flightNumber = el.get_attribute("data-flight")
+
     if gate in gates and time and time[0].isdigit():
         flights.append({
             "city": city[-4:-1],
             "time": time,
             "gate": gate.strip(),
-            "actual": estimated
+            "actual": estimated,
+            "flight": flightNumber.strip() if flightNumber else None,
         })
 
 driver.quit()
