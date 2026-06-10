@@ -99,6 +99,15 @@ const THEMES = {
   },
 }
 
+const THEME_STORAGE_KEY = 'phx-flight-board-theme'
+
+function getInitialTheme() {
+  if (typeof window === 'undefined') return 'dark'
+
+  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+  return storedTheme in THEMES ? storedTheme : 'dark'
+}
+
 // ─── Flap tiles ───────────────────────────────────────────────────────────────
 
 function Flaps({ text, size = 22, color, weight = 600, alt = false, t }) {
@@ -227,7 +236,7 @@ export default function FlightBoard() {
   const [loading, setLoading]         = useState(true)
   const [scraping, setScraping]       = useState(false)
   const [error, setError]             = useState(null)
-  const [theme, setTheme]             = useState('dark')
+  const [theme, setTheme]             = useState(getInitialTheme)
   const [tick, setTick]               = useState(0)
 
   const width  = useWindowWidth()
@@ -259,6 +268,10 @@ export default function FlightBoard() {
     const iv = setInterval(() => setTick(n => n + 1), 30000)
     return () => clearInterval(iv)
   }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+  }, [theme])
 
   const handleScrape = async () => {
     setScraping(true)
@@ -330,7 +343,7 @@ export default function FlightBoard() {
               )}
               <ScrapeButton onClick={handleScrape} scraping={scraping} t={t} />
               <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
                 style={{
                   background: t.toggleBg, color: t.toggleColor,
                   border: 'none', borderRadius: 6,
