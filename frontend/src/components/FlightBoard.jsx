@@ -485,7 +485,7 @@ export default function FlightBoard() {
           fontSize: 10, letterSpacing: '0.14em', color: t.foot, flexWrap: 'wrap', gap: 6,
         }}>
           <span>{boardFlights.length} flights · gates A22, 24–A30</span>
-          <span>Auto-refresh ⟳ 30 min</span>
+          <span>Auto-refresh ⟳ 60 min</span>
         </div>
 
       </div>
